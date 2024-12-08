@@ -3,6 +3,8 @@
     <!-- Main Content -->
     <div class="h-full w-full ml-10 bg-green-700 p-5">
       <h3 class="text-2xl text-center text-white mb-5">ECE UNN DATABASE</h3>
+      
+      <!-- Search Input -->
       <input
         type="text"
         v-model="search"
@@ -11,7 +13,13 @@
         class="mb-4 p-2 w-full rounded-md border border-gray-300"
       />
 
-      <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
+      <!-- Loading Spinner -->
+      <div v-if="loading" class="flex justify-center items-center h-32">
+        <LoadingSpinner />
+      </div>
+
+      <!-- Student Table -->
+      <table v-if="!loading" class="table-auto w-full text-left bg-white shadow-md rounded-lg">
         <thead class="bg-slate-700 text-white">
           <tr>
             <th class="p-3">Reg Number</th>
@@ -40,7 +48,7 @@
       <!-- Pagination -->
       <div class="flex justify-between items-center mt-4">
         <button
-          :disabled="page === 1"
+          :disabled="page === 1 || loading"
           @click="prevPage"
           class="px-4 py-2 bg-slate-600 text-white rounded-md disabled:opacity-50"
         >
@@ -49,159 +57,114 @@
         <span class="text-white">Page {{ page }}</span>
         <button
           @click="nextPage"
+          :disabled="loading"
           class="px-4 py-2 bg-slate-600 text-white rounded-md"
         >
           Next
         </button>
       </div>
     </div>
-
-    <!-- Student Details Modal -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-    >
-      <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-green-700">Student Details</h2>
-          <button
-            @click="closeModal"
-            class="text-gray-500 hover:text-gray-700 text-2xl"
-          >
-            ✕
-          </button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p><strong>Reg Number:</strong> {{ selectedStudent?.reg_number }}</p>
-            <p><strong>First Name:</strong> {{ selectedStudent?.first_name }}</p>
-            <p><strong>Middle Name:</strong> {{ selectedStudent?.middle_name }}</p>
-            <p><strong>Last Name:</strong> {{ selectedStudent?.last_name }}</p>
-            <p><strong>Gender:</strong> {{ selectedStudent?.gender }}</p>
-            <p><strong>Level:</strong> {{ selectedStudent?.level }}</p>
-            <p><strong>Date of Birth:</strong> {{ selectedStudent?.date_of_birth }}</p>
-          </div>
-          <div>
-            <p><strong>Religion:</strong> {{ selectedStudent?.religion }}</p>
-            <p><strong>Nationality:</strong> {{ selectedStudent?.nationality }}</p>
-            <p><strong>State of Origin:</strong> {{ selectedStudent?.state_of_origin }}</p>
-            <p><strong>State of Residence:</strong> {{ selectedStudent?.state_of_residence }}</p>
-            <p><strong>Guardian:</strong> {{ selectedStudent?.guardian_name }}</p>
-            <p><strong>Guardian Phone:</strong> {{ selectedStudent?.guardian_phone_number }}</p>
-          </div>
-          <div class="col-span-2 flex justify-center">
-            <img
-              :src="selectedStudent?.passport_url"
-              alt="Student Passport"
-              class="h-32 w-32 rounded-full border-2 border-green-700"
-            />
-          </div>
-        </div>
-        <button
-          @click="closeModal"
-          class="mt-4 w-full px-4 py-2 bg-green-700 text-white rounded-lg"
-        >
-          Close
-        </button>
-      </div>
-    </div>
   </div>
-
-
 </template>
 
-<script setup>
-import { ref , onMounted} from "vue";
+<script>
+import { ref } from "vue";
 import { debounce } from "lodash";
 import axios from "axios";
+import LoadingSpinner from "../components/LoadingSpinner.vue";
 import { useAuthStore } from "../stores/store";
-import { useRouter } from "vue-router";
 
+export default {
+  components: {
+    LoadingSpinner,
+  },
+  setup() {
+    const students = ref([]);
+    const page = ref(1);
+    const search = ref("");
+    const loading = ref(false);
+    const store = useAuthStore()
 
-// State
-const students = ref([]);
-const page = ref(1);
-const search = ref("");
-const showModal = ref(false);
-const selectedStudent = ref(null);
-const router = useRouter();
-// Auth
-const store = useAuthStore();
-const token = store.token;
-const ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
+    const token = store.token; // Replace with your token management logic
 
-// Fetch All Students
-const fetchDatabase = async () => {
-  try {
-    const response = await axios.get(`${ENDPOINT}/api/students`, {
-      params: { per_page: 50, page: page.value },
-      headers: { Authorization: `Bearer ${store.token}` },
-    });
-    if (response.status === 200) students.value = response.data.data;
-  } catch (error) {
-    console.error("Error fetching database:", error);
-    if (error.response && error.response.status === 401) {
-      // Redirect to login if token is invalid
-      router.push({ name: "Login" });
-    }
-  }
-};
-
-// Fetch Search Results
-const fetchSearchResults = async () => {
-  try {
-    if (search.value.trim() === "") {
-      fetchDatabase();
-      return;
-    }
-    const response = await axios.get(
-      `https://ece-database-azgbhzgrgshef4ae.canadacentral-01.azurewebsites.net/api/students/search`,
-      {
-        params: { query: search.value, per_page: 50, page: page.value },
-        headers: { Authorization: `Bearer ${token}` },
+    // Fetch All Students
+    const fetchDatabase = async () => {
+      loading.value = true;
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_ENDPOINT}/api/students`,
+          {
+            params: { per_page: 50, page: page.value },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.status === 200) students.value = response.data.data;
+      } catch (error) {
+        console.error("Error fetching database:", error);
+      } finally {
+        loading.value = false;
       }
-    );
-    if (response.status === 200) students.value = response.data.data;
-  } catch (error) {
-    console.error("Error fetching search results:", error);
-  }
+    };
+
+    // Fetch Search Results
+    const fetchSearchResults = async () => {
+      if (!search.value.trim()) {
+        fetchDatabase();
+        return;
+      }
+      loading.value = true;
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_ENDPOINT}/api/students/search`,
+          {
+            params: { query: search.value, per_page: 50, page: page.value },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.status === 200) students.value = response.data.data;
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Handle Search Input
+    const debouncedFetchSearchResults = debounce(fetchSearchResults, 1000);
+    const handleSearchInput = () => {
+      debouncedFetchSearchResults();
+    };
+
+    // Pagination Handlers
+    const prevPage = () => {
+      if (page.value > 1) {
+        page.value--;
+        fetchDatabase();
+      }
+    };
+
+    const nextPage = () => {
+      page.value++;
+      fetchDatabase();
+    };
+
+    // Fetch Students on Mount
+    fetchDatabase();
+
+    return {
+      students,
+      page,
+      search,
+      loading,
+      fetchDatabase,
+      fetchSearchResults,
+      handleSearchInput,
+      prevPage,
+      nextPage,
+    };
+  },
 };
-
-// Modal Handlers
-const openStudentDetails = (student) => {
-  selectedStudent.value = student;
-  showModal.value = true;
-};
-
-const closeModal = () => {
-  showModal.value = false;
-};
-
-// Handle Search
-const debouncedFetchSearchResults = debounce(fetchSearchResults, 1000);
-const handleSearchInput = () => {
-  debouncedFetchSearchResults();
-};
-
-// Fetch Students on Mount
-onMounted(() => fetchDatabase());
-
-
-const logout = async () => {
-  try {
-    await axios.post(`${ENDPOINT}/api/logout`, {}, {
-      headers: { Authorization: `Bearer ${store.token}` },
-    });
-  } catch (error) {
-    console.error("Error during logout:", error);
-  } finally {
-    store.setToken(null);
-    localStorage.removeItem("authToken");
-    router.push({ name: "Login" });
-  }
-};
-
-</script>
+</script> 
 
 <style scoped>
 table {
