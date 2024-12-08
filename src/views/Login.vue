@@ -10,7 +10,8 @@ const loading = ref(false);
 const email = ref("");
 const password = ref("");
 const error = ref(null);
-const students = ref([]);
+
+const ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
 
 const login = async () => {
   try {
@@ -19,33 +20,36 @@ const login = async () => {
       throw new Error("Email and password are required");
     }
 
-    const response = await axios.post(`https://ece-database-azgbhzgrgshef4ae.canadacentral-01.azurewebsites.net/api/login`, {
+    const response = await axios.post(`${ENDPOINT}/api/login`, {
       email: email.value,
       password: password.value,
     });
-    console.log()
-    
+
     const status = response.status;
-
-    
-
     if (status === 200) {
-     students.value = response.data.data;
-      
-      store.setToken(students.token);
-      store.setUser(students.user)
-      console.log(store.$state.token )
+      const { token, user } = response.data.data;
+      if (!token || !user) throw new Error("Missing token or user in response");
+
+      // Store token and user in Pinia store
+      store.setToken(token);
+      store.setUser(user);
+
+      // Save token to localStorage for persistence
+      localStorage.setItem("authToken", token);
+
+      // Redirect to the Home page
       router.push({ name: "Home" });
     } else {
       throw new Error("Invalid credentials");
     }
   } catch (err) {
     error.value = err.message;
+    console.error("Login Error:", err.message);
   } finally {
     loading.value = false;
   }
-  
 };
+
 </script>
 
 <template>

@@ -1,32 +1,22 @@
-import { defineStore } from 'pinia';
+import { defineStore } from "pinia";
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
-    token: null,
+    token: localStorage.getItem("authToken") || null,
     user: null,
   }),
-
   actions: {
-    setToken(token) {
-      this.token = token;
+    setToken(newToken) {
+      this.token = newToken;
+      if (newToken) localStorage.setItem("authToken", newToken);
+      else localStorage.removeItem("authToken");
     },
     setUser(user) {
       this.user = user;
     },
-    logout() {
-      this.token = null;
-      this.user = null;
+    clearAuth() {
+      this.setToken(null);
+      this.setUser(null);
     },
-  },
-
-  getters: {
-    isAuthenticated: (state) => !!state.token,
-    getUser: (state) => state.user,
-  },
-
-  // Enable persistence
-  persist: {
-    key: 'auth-store', // Optional: customize the storage key
-    storage: localStorage, // Specify storage type: localStorage or sessionStorage
   },
 });

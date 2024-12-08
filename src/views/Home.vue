@@ -1,89 +1,226 @@
-  
 <template>
-<div class="h-full w-full ml-10  bg-slate-500"> 
-<h3 class="text-2xl justify-items-center ">ECE UNN DATABASE</h3>
-</div>
-<div v-for="student in students">
-  <pre> {{ student.first_name }} </pre>
-  <div></div>
-</div> 
+  <div>
+    <!-- Main Content -->
+    <div class="h-full w-full ml-10 bg-green-700 p-5">
+      <h3 class="text-2xl text-center text-white mb-5">ECE UNN DATABASE</h3>
+      <input
+        type="text"
+        v-model="search"
+        @input="handleSearchInput"
+        placeholder="Search by name or reg number"
+        class="mb-4 p-2 w-full rounded-md border border-gray-300"
+      />
 
-//implement search bar to ppoint to a url and then display results in this same vue and then display the results in a table style withh css only return firstname ,last name ,reg_number
-  <!-- <div>
-    <Table class="p-2 text-sm">
-      <TableHeader class="bg-[#E4E4E5]">
-        <TableRow>
-          <TableHead class="table-header">Ticket Number</TableHead>
-          <TableHead class="table-header">Customer Name</TableHead>
-          <TableHead class="table-header">Created At</TableHead>
-          <TableHead class="table-header">Agent Action</TableHead>
-          <TableHead class="table-header">Last Conversation</TableHead>
-          <TableHead class="table-header">Channel</TableHead>
-          <TableHead class="table-header">Agent Name</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow
-          v-for="(row, index) in escalationList"
-          :key="row.id"
-          :style="{ backgroundColor: row.background_color || '#ffffff' }"
-          class="border-b border-gray-300 p-2 text-sm hover:bg-opacity-90"
+      <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
+        <thead class="bg-slate-700 text-white">
+          <tr>
+            <th class="p-3">Reg Number</th>
+            <th class="p-3">First Name</th>
+            <th class="p-3">Middle Name</th>
+            <th class="p-3">Last Name</th>
+            <th class="p-3">Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="student in students"
+            :key="student.reg_number"
+            class="hover:bg-gray-100 cursor-pointer"
+            @click="openStudentDetails(student)"
+          >
+            <td class="p-3 border-b">{{ student.reg_number }}</td>
+            <td class="p-3 border-b">{{ student.first_name }}</td>
+            <td class="p-3 border-b">{{ student.middle_name }}</td>
+            <td class="p-3 border-b">{{ student.last_name }}</td>
+            <td class="p-3 border-b">{{ student.level }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4">
+        <button
+          :disabled="page === 1"
+          @click="prevPage"
+          class="px-4 py-2 bg-slate-600 text-white rounded-md disabled:opacity-50"
         >
-          <TableCell class="text-sm font-normal">{{ row.ticket_number }}</TableCell>
-          <TableCell class="text-sm font-normal">{{ row.customer_name }}</TableCell>
-          <TableCell class="text-sm font-normal">{{ row.created_at }}</TableCell>
-          <TableCell class="text-sm font-normal br-3" ><Badge
-            class="w-fit text-center"
-            :variant="getBadgeColor(row.agent_action)"
-            >{{ row.agent_action }}</Badge></TableCell>
-          <TableCell class="text-sm font-normal">{{ row.last_conversation }}</TableCell>
-          <TableCell class="text-sm font-normal">{{ row.channel }}</TableCell>
-          <TableCell class="text-sm font-normal">{{ row.agent_name || 'N/A' }}</TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
-  </div> -->
+          Previous
+        </button>
+        <span class="text-white">Page {{ page }}</span>
+        <button
+          @click="nextPage"
+          class="px-4 py-2 bg-slate-600 text-white rounded-md"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div
+      v-if="showModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-green-700">Student Details</h2>
+          <button
+            @click="closeModal"
+            class="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p><strong>Reg Number:</strong> {{ selectedStudent?.reg_number }}</p>
+            <p><strong>First Name:</strong> {{ selectedStudent?.first_name }}</p>
+            <p><strong>Middle Name:</strong> {{ selectedStudent?.middle_name }}</p>
+            <p><strong>Last Name:</strong> {{ selectedStudent?.last_name }}</p>
+            <p><strong>Gender:</strong> {{ selectedStudent?.gender }}</p>
+            <p><strong>Level:</strong> {{ selectedStudent?.level }}</p>
+            <p><strong>Date of Birth:</strong> {{ selectedStudent?.date_of_birth }}</p>
+          </div>
+          <div>
+            <p><strong>Religion:</strong> {{ selectedStudent?.religion }}</p>
+            <p><strong>Nationality:</strong> {{ selectedStudent?.nationality }}</p>
+            <p><strong>State of Origin:</strong> {{ selectedStudent?.state_of_origin }}</p>
+            <p><strong>State of Residence:</strong> {{ selectedStudent?.state_of_residence }}</p>
+            <p><strong>Guardian:</strong> {{ selectedStudent?.guardian_name }}</p>
+            <p><strong>Guardian Phone:</strong> {{ selectedStudent?.guardian_phone_number }}</p>
+          </div>
+          <div class="col-span-2 flex justify-center">
+            <img
+              :src="selectedStudent?.passport_url"
+              alt="Student Passport"
+              class="h-32 w-32 rounded-full border-2 border-green-700"
+            />
+          </div>
+        </div>
+        <button
+          @click="closeModal"
+          class="mt-4 w-full px-4 py-2 bg-green-700 text-white rounded-lg"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+
 </template>
 
-
 <script setup>
-import { onMounted, ref } from 'vue';
-
-// import { useRouter } from 'vue-router';
-// import { useToast } from 'vue-toastification';
-// import 'vue-toastification/dist/index.css';
-import axios from 'axios';
-// import Table from '../components/Table.vue';
-// import TableBody from '../components/TableBody.vue';
-// import TableHead from '../components/TableHeader.vue';
-// import TableRow from '../components/TableRow.vue';
-
+import { ref , onMounted} from "vue";
+import { debounce } from "lodash";
+import axios from "axios";
 import { useAuthStore } from "../stores/store";
+import { useRouter } from "vue-router";
 
-const data = ref([])
-const store = useAuthStore();
-console.log("token" , store.token , store.$state.token)
-const token = "10|iGsCAdYcOyFGsKrRiUr46TMvnQ5endPuVQYQVmLpf660ea41"
+
+// State
 const students = ref([]);
-const getStudentData = async () => {
- try {
-  const response = await axios.get('https://ece-database-azgbhzgrgshef4ae.canadacentral-01.azurewebsites.net/api/students', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if(response.status === 200){
-    students.value = response.data.data;
+const page = ref(1);
+const search = ref("");
+const showModal = ref(false);
+const selectedStudent = ref(null);
+const router = useRouter();
+// Auth
+const store = useAuthStore();
+const token = store.token;
+const ENDPOINT = import.meta.env.VITE_API_ENDPOINT;
+
+// Fetch All Students
+const fetchDatabase = async () => {
+  try {
+    const response = await axios.get(`${ENDPOINT}/api/students`, {
+      params: { per_page: 50, page: page.value },
+      headers: { Authorization: `Bearer ${store.token}` },
+    });
+    if (response.status === 200) students.value = response.data.data;
+  } catch (error) {
+    console.error("Error fetching database:", error);
+    if (error.response && error.response.status === 401) {
+      // Redirect to login if token is invalid
+      router.push({ name: "Login" });
+    }
   }
-  
-  console.log(students.value);
-} catch (error) {
-  console.error(error);
-}
 };
 
+// Fetch Search Results
+const fetchSearchResults = async () => {
+  try {
+    if (search.value.trim() === "") {
+      fetchDatabase();
+      return;
+    }
+    const response = await axios.get(
+      `https://ece-database-azgbhzgrgshef4ae.canadacentral-01.azurewebsites.net/api/students/search`,
+      {
+        params: { query: search.value, per_page: 50, page: page.value },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (response.status === 200) students.value = response.data.data;
+  } catch (error) {
+    console.error("Error fetching search results:", error);
+  }
+};
 
-onMounted( () => {
-  getStudentData();
-})
+// Modal Handlers
+const openStudentDetails = (student) => {
+  selectedStudent.value = student;
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+};
+
+// Handle Search
+const debouncedFetchSearchResults = debounce(fetchSearchResults, 1000);
+const handleSearchInput = () => {
+  debouncedFetchSearchResults();
+};
+
+// Fetch Students on Mount
+onMounted(() => fetchDatabase());
+
+
+const logout = async () => {
+  try {
+    await axios.post(`${ENDPOINT}/api/logout`, {}, {
+      headers: { Authorization: `Bearer ${store.token}` },
+    });
+  } catch (error) {
+    console.error("Error during logout:", error);
+  } finally {
+    store.setToken(null);
+    localStorage.removeItem("authToken");
+    router.push({ name: "Login" });
+  }
+};
+
 </script>
+
+<style scoped>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px;
+}
+
+th {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+</style>

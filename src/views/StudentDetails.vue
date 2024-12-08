@@ -12,16 +12,22 @@
   
   <script setup>
   import { onMounted, ref } from "vue";
+  import { useAuthStore } from "../stores/store";
+
   
   const student = ref({});
-  
+
+  const store = useAuthStore();
+  console.log(store.$state.token)
   onMounted(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const data = queryParams.get("data");
     if (data) {
       student.value = JSON.parse(decodeURIComponent(data));
     }
-  });
+  }
+
+);
   </script>
   
   <style scoped>
