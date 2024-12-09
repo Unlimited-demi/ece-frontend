@@ -1,7 +1,10 @@
 <template>
   <div>
     <header class="w-full bg-green-700 py-4 px-6 flex justify-between items-center">
-      <h1 class="text-white text-2xl">ECE UNN</h1>
+      <h1 class="text-white text-2xl">
+        <img src="./assets/cropped-unnlogo.jpeg" alt="Legend Logo" class="w-30 mb-4 mr-90" />
+      
+      </h1>
       <button
         v-if="authStore.token"
         @click="logout"

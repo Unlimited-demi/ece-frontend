@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Main Content -->
-    <div class="h-full w-full ml-10 bg-green-700 p-5">
+    <div class="h-full w-full bg-green-700 p-5">
       <h3 class="text-2xl text-center text-white mb-5">ECE UNN DATABASE</h3>
 
       <!-- Search Input -->
@@ -72,23 +72,23 @@
           <h2 class="text-xl font-semibold text-green-700">Student Details</h2>
           <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
           <div>
-            <p><strong>Reg Number:</strong> {{ selectedStudent?.reg_number }}</p>
-            <p><strong>First Name:</strong> {{ selectedStudent?.first_name }}</p>
-            <p><strong>Middle Name:</strong> {{ selectedStudent?.middle_name }}</p>
-            <p><strong>Last Name:</strong> {{ selectedStudent?.last_name }}</p>
-            <p><strong>Gender:</strong> {{ selectedStudent?.gender }}</p>
-            <p><strong>Level:</strong> {{ selectedStudent?.level }}</p>
-            <p><strong>Date of Birth:</strong> {{ selectedStudent?.date_of_birth }}</p>
+            <p class="p-2"><strong>Reg Number:</strong> {{ selectedStudent?.reg_number }}</p>
+            <p class="p-2"><strong>First Name:</strong> {{ selectedStudent?.first_name }}</p>
+            <p class="p-2"><strong>Middle Name:</strong> {{ selectedStudent?.middle_name }}</p>
+            <p class="p-2"><strong>Last Name:</strong> {{ selectedStudent?.last_name }}</p>
+            <p class="p-2"><strong>Gender:</strong> {{ selectedStudent?.gender }}</p>
+            <p class="p-2"><strong>Level:</strong> {{ selectedStudent?.level }}</p>
+            <p class="p-2"><strong>Date of Birth:</strong> {{ selectedStudent?.date_of_birth.split('T')[0] }}</p>
           </div>
           <div>
-            <p><strong>Religion:</strong> {{ selectedStudent?.religion }}</p>
-            <p><strong>Nationality:</strong> {{ selectedStudent?.nationality }}</p>
-            <p><strong>State of Origin:</strong> {{ selectedStudent?.state_of_origin }}</p>
-            <p><strong>State of Residence:</strong> {{ selectedStudent?.state_of_residence }}</p>
-            <p><strong>Guardian:</strong> {{ selectedStudent?.guardian_name }}</p>
-            <p><strong>Guardian Phone:</strong> {{ selectedStudent?.guardian_phone_number }}</p>
+            <p class="p-2"><strong>Religion:</strong> {{ selectedStudent?.religion }}</p>
+            <p class="p-2"><strong>Nationality:</strong> {{ selectedStudent?.nationality }}</p>
+            <p class="p-2"><strong>State of Origin:</strong> {{ selectedStudent?.state_of_origin }}</p>
+            <p class="p-2"><strong>State of Residence:</strong> {{ selectedStudent?.state_of_residence }}</p>
+            <p class="p-2"><strong>Guardian:</strong> {{ selectedStudent?.guardian_name }}</p>
+            <p class="p-2"><strong>Guardian Phone:</strong> {{ selectedStudent?.guardian_phone_number }}</p>
           </div>
           <div class="col-span-2 flex justify-center">
             <img
