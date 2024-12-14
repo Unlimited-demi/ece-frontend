@@ -12,7 +12,7 @@ const router = createRouter({
 });
 
 // Global route guard
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, next) => {
   const store = useAuthStore();
   const token = store.token || localStorage.getItem("authToken");
 
