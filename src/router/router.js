@@ -1,31 +1,31 @@
-import { createRouter, createWebHistory } from "vue-router";
-import { useAuthStore } from "../stores/store";
+  import { createRouter } from "vue-router";
+  import { useAuthStore } from "../stores/store";
 
-const routes = [
-  { path: "/login", name: "Login", component: () => import("../views/Login.vue") },
-  { path: "/", name: "Home", component: () => import("../views/Home.vue") },
-];
+  const routes = [
+    { path: "/login", name: "Login", component: () => import("../views/Login.vue") },
+    { path: "/", name: "Home", component: () => import("../views/Home.vue") },
+  ];
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
+  const router = createRouter({
+    
+    routes,
+  });
 
-// Global route guard
-router.beforeEach((to, from, next) => {
-  const store = useAuthStore();
-  const token = store.token || localStorage.getItem("authToken");
+  // Global route guard
+  router.beforeEach((to, from, next) => {
+    const store = useAuthStore();
+    const token = store.token || localStorage.getItem("authToken");
 
-  if (to.name !== "Login" && !token) {
-    return next({ name: "Login" }); // Redirect to login
-  }
+    if (to.name !== "Login" && !token) {
+      return next({ name: "Login" }); // Redirect to login
+    }
 
-  if (token && !store.token) {
-    // Restore token in store from localStorage
-    store.setToken(token);
-  }
+    if (token && !store.token) {
+      // Restore token in store from localStorage
+      store.setToken(token);
+    }
 
-  next();
-});
+    next();
+  });
 
-export default router;
+  export default router;
