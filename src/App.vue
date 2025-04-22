@@ -1,23 +1,9 @@
 <template>
-  <div>
-    <header class="w-full bg-green-700 py-4 px-6 flex justify-between items-center">
-      <h1 class="text-white text-2xl">
-        <img src="./assets/cropped-unnlogo.jpeg" alt="Legend Logo" class="w-30 mb-4 mr-90" />
-      
-      </h1>
-      <button
-        v-if="authStore.token"
-        @click="logout"
-        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-      >
-        Logout
-      </button>
-    </header>
-    <router-view />
-  </div>
+  <AppLayout />
 </template>
 
 <script setup>
+import AppLayout from './layouts/AppLayout.vue';
 import { useAuthStore } from "./stores/store";
 import { useRouter } from "vue-router";
 

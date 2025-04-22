@@ -17,7 +17,7 @@ router.beforeEach((to, from, next) => {
   const token = store.token || localStorage.getItem("authToken");
 
   if (to.meta.requiresAuth && !token) {
-    return next({ name: "Login", query: { redirect: to.fullPath } }); // Redirect to login with redirect query
+    return next({ name: "Login" }); // Removed the redirect query parameter
   }
 
   if (token && !store.token) {
