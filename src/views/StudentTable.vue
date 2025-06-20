@@ -49,7 +49,8 @@
         <span class="text-white">Page {{ page }}</span>
         <button
           @click="nextPage"
-          class="px-4 py-2 bg-slate-600 text-white rounded-md"
+          :disabled="students.length < perPage"
+          class="px-4 py-2 bg-slate-600 text-white rounded-md disabled:opacity-50"
         >
           Next
         </button>
@@ -120,6 +121,7 @@ const page = ref(1);
 const search = ref("");
 const showModal = ref(false);
 const selectedStudent = ref(null);
+const perPage = 50; // add page size constant
 
 // Auth
 const store = useAuthStore();

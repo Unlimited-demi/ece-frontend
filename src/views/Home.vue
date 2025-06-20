@@ -57,8 +57,8 @@
         <span class="text-white">Page {{ page }}</span>
         <button
           @click="nextPage"
-          :disabled="loading"
-          class="px-4 py-2 bg-slate-600 text-white rounded-md"
+          :disabled="loading || students.length < 50"
+          class="px-4 py-2 bg-slate-600 text-white rounded-md disabled:opacity-50"
         >
           Next
         </button>
